@@ -1,66 +1,47 @@
 {
-  "name": "nodejs-getting-started",
-  "version": "1.0.0",
-  "description": "End to end sample for running Node.js applications on Google Cloud Platform",
-  "repository": "https://github.com/GoogleCloudPlatform/nodejs-getting-started",
+  "name": "appengine-pubsub",
+  "description": "Node.js Google Cloud PubSub sample for Google App Engine",
+  "version": "0.0.1",
   "private": true,
+  "license": "Apache Version 2.0",
+  "author": "Google Inc.",
+  "engines": {
+    "node": "8.x.x"
+  },
   "scripts": {
     "start": "node app.js",
-    "e2e": "repo-tools test deploy",
-    "test": "repo-tools test app",
-    "cover": "nyc --cache npm test; nyc report --reporter=html"
-  },
-  "author": "Google Inc.",
-  "contributors": [
-    {
-      "name": "Jon Wayne Parrott",
-      "email": "jonwayne@google.com"
-    },
-    {
-      "name": "Jonathan Simon",
-      "email": "jbsimon@google.com"
-    },
-    {
-      "name": "Jason Dobry",
-      "email": "jdobry@google.com"
-    },
-    {
-      "name": "Ace Nassri",
-      "email": "anassri@google.com"
-    }
-  ],
-  "cloud-repo-tools": {
-    "requiresKeyFile": true,
-    "requiresProjectId": true,
-    "test": {
-      "app": {
-        "args": [
-          "app.js"
-        ],
-        "msg": "Hello, world!"
-      }
-    }
-  },
-  "license": "Apache-2.0",
-  "semistandard": {
-    "globals": [
-      "after",
-      "afterEach",
-      "before",
-      "beforeEach",
-      "describe",
-      "it"
-    ]
+    "test": "repo-tools test app && ava -T 30s */*.test.js"
   },
   "dependencies": {
-    "express": "4.16.2"
+    "@google-cloud/pubsub": "0.16.4",
+    "body-parser": "1.18.2",
+    "express": "4.16.2",
+    "pug": "2.0.1",
+    "safe-buffer": "5.1.1"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "2.2.1",
     "ava": "0.25.0",
-    "supertest": "3.0.0"
+    "uuid": "3.2.1"
   },
-  "engines": {
-    "node": ">=4.3.2"
+  "cloud-repo-tools": {
+    "requiresProjectId": true,
+    "requiresKeyFile": true,
+    "test": {
+      "app": {
+        "requiredEnvVars": [
+          "PUBSUB_TOPIC",
+          "PUBSUB_VERIFICATION_TOKEN"
+        ],
+        "msg": "Messages received by this instance",
+        "substitutions": "YOUR_TOPIC_NAME=$PUBSUB_TOPIC,YOUR_VERIFICATION_TOKEN=$PUBSUB_VERIFICATION_TOKEN"
+      },
+      "build": {
+        "requiredEnvVars": [
+          "PUBSUB_TOPIC",
+          "PUBSUB_VERIFICATION_TOKEN"
+        ]
+      }
+    }
   }
 }

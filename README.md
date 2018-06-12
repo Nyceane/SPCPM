@@ -1,62 +1,63 @@
-# 1 - Hello world
+# Node.js Cloud Pub/Sub sample for Google App Engine
 
-![Build Status][ci-badge]
+This sample shows how to send and receive messages using [Google Cloud Pub/Sub](https://cloud.google.com/pubsub) on [Google App Engine](https://cloud.google.com/appengine)
+[standard environment](https://cloud.google.com/appengine/docs/standard/nodejs)
+and [flexible environment](https://cloud.google.com/appengine/docs/flexible/nodejs).
 
-This folder contains the sample code for the [Hello world][step-1]
-tutorial. Please refer to the tutorial for instructions on configuring, running,
-and deploying this sample.
+## Setup
 
-[ci-badge]: https://storage.googleapis.com/nodejs-getting-started-tests-badges/1-tests.svg
-[step-1]: https://cloud.google.com/nodejs/getting-started/hello-world
+Before you can run or deploy the sample, you will need to do the following:
 
-# Simple instructions
+1. Enable the Cloud Pub/Sub API in the [Google Developers Console](https://console.developers.google.com/project/_/apiui/apiview/pubsub/overview).
+1. Create a topic and subscription.
 
-1.  Install [Node.js](https://nodejs.org/en/).
+        gcloud beta pubsub topics create <your-topic-name>
+        gcloud beta pubsub subscriptions create <your-subscription-name> \
+          --topic <your-topic-name> \
+          --push-endpoint \
+            https://<your-project-id>.appspot.com/pubsub/push?token=<your-verification-token> \
+          --ack-deadline 30
 
-    * Optional: Install [Yarn](https://yarnpkg.com/).
+1. Update the environment variables in `app.standard.yaml` or `app.flexible.yaml`
+(depending on your App Engine environment).
 
-1.  Install [git](https://git-scm.com/).
-1.  Create a [Google Cloud Platform project](https://console.cloud.google.com).
-1.  Install the [Google Cloud SDK](https://cloud.google.com/sdk/).
+## Running locally
 
-    * After downloading the SDK, initialize it:
+Refer to the [appengine/README.md](../README.md) file for instructions on
+running and deploying.
 
-            gcloud init
+When running locally, you can use the [Google Cloud SDK](https://cloud.google.com/sdk)
+to provide authentication to use Google Cloud APIs:
 
-1.  Clone the repository:
+    gcloud init
 
-        git clone https://github.com/GoogleCloudPlatform/nodejs-getting-started.git
+Then set environment variables before starting your application:
 
-1.  Change directory:
+    export PUBSUB_VERIFICATION_TOKEN=<your-verification-token>
+    export PUBSUB_TOPIC=<your-topic-name>
+    npm start
 
-        cd nodejs-getting-started/1-hello-world
+### Simulating push notifications
 
-1.  Install dependencies using NPM or Yarn:
+The application can send messages locally, but it is not able to receive push
+messages locally. You can, however, simulate a push message by making an HTTP
+request to the local push notification endpoint. There is an included
+`sample_message.json`. You can use `curl` or [httpie](https://github.com/jkbrzt/httpie)
+to POST this:
 
-    * Using NPM:
+    curl -H "Content-Type: application/json" -i --data @sample_message.json ":8080/pubsub/push?token=<your-verification-token>"
 
-            npm install
+Or
 
-    * Using Yarn:
+    http POST ":8080/pubsub/push?token=<your-verification-token>" < sample_message.json
 
-            yarn install
+Response:
 
-1.  Start the app using NPM or Yarn:
+    HTTP/1.1 200 OK
+    Connection: keep-alive
+    Date: Mon, 31 Aug 2015 22:19:50 GMT
+    Transfer-Encoding: chunked
+    X-Powered-By: Express
 
-    * Using NPM:
-
-            npm start
-
-    * Using Yarn:
-
-            yarn start
-
-1.  View the app at [http://localhost:8080](http://localhost:8080).
-
-1.  Stop the app by pressing `Ctrl+C`.
-
-1.  Deploy the app:
-
-        gcloud app deploy
-
-1.  View the deployed app at [https://YOUR_PROJECT_ID.appspot.com](https://YOUR_PROJECT_ID.appspot.com).
+After the request completes, you can refresh `localhost:8080` and see the
+message in the list of received messages.
