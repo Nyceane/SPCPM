@@ -40,6 +40,26 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
+// Add headers
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+
 const formBodyParser = bodyParser.urlencoded({ extended: false });
 const jsonBodyParser = bodyParser.json();
 
@@ -55,7 +75,7 @@ const publisher = topic.publisher();
 
 // [START index]
 app.get('/', (req, res) => {
-  res.render('index', { messages: messages });
+  res.render('./view/map.html');
 });
 
 app.post('/', formBodyParser, (req, res, next) => {
@@ -85,17 +105,15 @@ app.post('/pubsub/push', jsonBodyParser, (req, res) => {
   const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8');
 
   //messages.push(message);
-  console.log(message);
   var data = qs.parse(message);
-    getModel().create(data, (err, entity) => {
+  data.timestamp = new Date().getTime();
+  console.log(data);
+  
+  getModel().create(data, (err, entity) => {
     if (err) {
-      console.log(err);
       next(err);
-
-
       return;
     }
-            console.log(entity);
 
     res.json(entity);
   });
@@ -103,6 +121,26 @@ app.post('/pubsub/push', jsonBodyParser, (req, res) => {
   //res.status(200).send();
 });
 // [END push]
+
+app.get('/data', jsonBodyParser, (req, res) => {
+  getModel().list(1, (err, entities, cursor) => {
+    if (err) {
+      next(err);
+      console.log(err);
+      return;
+    }
+    else
+    {
+      if(entities.length > 0)
+      {
+        res.json(entities[0]);
+      }
+      else res.status(200).send();
+    }
+  });
+});
+
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;
