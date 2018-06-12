@@ -23,7 +23,8 @@ const Buffer = require('safe-buffer').Buffer;
 const process = require('process'); // Required for mocking environment variables
 const qs = require('querystring')
 function getModel () {
-return require(`./model-${require('/config').get('DATA_BACKEND')}`);
+  return require(`./model-${require('./config').get('DATA_BACKEND')}`);
+}
 
 // By default, the client will authenticate using the service account file
 // specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable and use
@@ -88,9 +89,14 @@ app.post('/pubsub/push', jsonBodyParser, (req, res) => {
   var data = qs.parse(message);
     getModel().create(data, (err, entity) => {
     if (err) {
+      console.log(err);
       next(err);
+
+
       return;
     }
+            console.log(entity);
+
     res.json(entity);
   });
 
