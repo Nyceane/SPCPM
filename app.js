@@ -60,6 +60,11 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(express.static(__dirname + '/public'));
+app.set('views', __dirname + '/public/views');
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
+
 const formBodyParser = bodyParser.urlencoded({ extended: false });
 const jsonBodyParser = bodyParser.json();
 
@@ -75,7 +80,7 @@ const publisher = topic.publisher();
 
 // [START index]
 app.get('/', (req, res) => {
-  res.render('./view/map.html');
+  res.render('map.html');
 });
 
 app.post('/', formBodyParser, (req, res, next) => {
